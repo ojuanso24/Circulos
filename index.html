@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagrama de Venn Interactivo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        #container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        canvas {
+            border: 1px solid black;
+            max-width: 100%;
+            height: auto;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        input, button {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        table {
+            margin-top: 20px;
+            border-collapse: collapse;
+            width: 90%;
+            max-width: 500px;
+            background-color: white;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+        @media (min-width: 768px) {
+            #container {
+                flex-direction: row;
+            }
+            .controls {
+                flex-direction: row;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Diagrama de Venn Interactivo</h1>
+    <div class="controls">
+        <label for="numCircles">Círculos:</label>
+        <input type="number" id="numCircles" value="3" min="2" max="10">
+        <label for="numPoints">Puntos:</label>
+        <input type="number" id="numPoints" value="20" min="5" max="50">
+        <button onclick="generateVennDiagram()">Generar</button>
+    </div>
+
+    <div id="container">
+        <canvas id="vennCanvas" width="600" height="600"></canvas>
+    </div>
+
+    <h2>Lista de Pertenencia</h2>
+    <table id="table">
+        <tr>
+            <th>Número</th>
+            <th>Pertenencia</th>
+        </tr>
+    </table>
+
+    <script>
+        function generateVennDiagram() {
+            const canvas = document.getElementById("vennCanvas");
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const numCircles = parseInt(document.getElementById("numCircles").value);
+            const numPoints = parseInt(document.getElementById("numPoints").value);
+            
+            let circles = [];
+            let colors = ["red", "blue", "green", "orange", "purple", "cyan", "pink", "brown", "yellow", "gray"];
+            
+            for (let i = 0; i < numCircles; i++) {
+                let x = Math.random() * 400 + 100;
+                let y = Math.random() * 400 + 100;
+                let radius = Math.random() * 80 + 50;
+                let color = colors[i % colors.length];
+
+                circles.push({ x, y, radius, color, label: String.fromCharCode(65 + i) });
+                
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                ctx.fillStyle = "black";
+                ctx.fillText(String.fromCharCode(65 + i), x, y);
+            }
+            
+            let table = document.getElementById("table");
+            table.innerHTML = "<tr><th>Número</th><th>Pertenencia</th></tr>";
+            
+            for (let i = 0; i < numPoints; i++) {
+                let px = Math.random() * 500 + 50;
+                let py = Math.random() * 500 + 50;
+                let belongsTo = [];
+                
+                circles.forEach(c => {
+                    let dist = Math.sqrt((px - c.x) ** 2 + (py - c.y) ** 2);
+                    if (dist < c.radius) belongsTo.push(c.label);
+                });
+                
+                ctx.fillStyle = "black";
+                ctx.fillText(i + 1, px, py);
+                
+                let row = table.insertRow();
+                row.insertCell(0).innerText = i + 1;
+                row.insertCell(1).innerText = belongsTo.length > 0 ? belongsTo.join(" ∩ ") : "∉ A, B, C...";
+            }
+        }
+
+        window.onload = generateVennDiagram;
+    </script>
+</body>
+</html>
